@@ -1,0 +1,11 @@
+version: "2"
+services:
+  build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - TAG=${TAG}
+    entrypoint: /bin/true
+    environment:
+      - CI=true
