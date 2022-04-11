@@ -12,6 +12,7 @@ docker-compose -f $DOCKER_COMPOSE_FILE run build
 
 IMAGE=ailohq/${SERVICE_NAME}:${TAG}
 IMAGE_AWS="${AILO_AWS_ECR_URI}/ailo/${SERVICE_NAME}:${TAG}"
+IMAGE_AWS_LATEST="${AILO_AWS_ECR_URI}/ailo/${SERVICE_NAME}:latest"
 
 echo "--- docker build"
 docker build -t "${IMAGE}" -t "${IMAGE_AWS}" --build-arg TAG="${TAG}" .
@@ -29,11 +30,4 @@ aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AW
 
 echo "--- docker push ${IMAGE_AWS}}"
 docker push "${IMAGE_AWS}"
-
-echo "--- docker image digests"
-# The repo digest contains the hash of the image on the repo server.
-# Pass this to jellyfish to in the deploy step.
-REPO_DIGESTS=$(docker inspect --format='{{join .RepoDigests "\n"}}' "${IMAGE}")
-echo "IMAGE: ${IMAGE}"
-echo "REPO_DIGESTS: ${REPO_DIGESTS}"
-buildkite-agent meta-data set "REPO_DIGESTS" "${REPO_DIGESTS}"
+docker push "${IMAGE_AWS_LATEST}"
