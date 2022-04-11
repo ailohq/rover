@@ -6,7 +6,7 @@ env:
 steps:
   - label: "Build and Publish"
     key: build
-
+    branches: "master"
     command: ./ops/ci/build.sh
     env:
       YARN_CACHE_FOLDER: "/yarn_home/.cache"

@@ -1,5 +1,5 @@
 FROM ubuntu
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update && apt-get install -y curl jq
 
 RUN curl -sSL https://rover.apollo.dev/nix/v0.4.0 | sh
 RUN echo 'export PATH=$HOME/.rover/bin:$PATH' >> $HOME/.bashrc
