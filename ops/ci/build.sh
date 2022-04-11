@@ -28,6 +28,5 @@ aws ecr create-repository --repository-name "ailo/${SERVICE_NAME}" || true
 aws ecr set-repository-policy --repository-name "ailo/${SERVICE_NAME}" --policy-text "${AILO_AWS_ECR_POLICY}"
 aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${AILO_AWS_ECR_URI}"
 
-echo "--- docker push ${IMAGE_AWS}}"
+echo "--- docker push ${IMAGE_AWS}"
 docker push "${IMAGE_AWS}"
-docker push "${IMAGE_AWS_LATEST}"
