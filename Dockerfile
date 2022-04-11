@@ -1,9 +1,12 @@
-FROM ubuntu
-RUN apt-get update && apt-get install -y curl jq
+FROM alpine
+
+RUN apk update && apk upgrade && apk --no-cache add curl jq
 
 RUN curl -sSL https://rover.apollo.dev/nix/v0.4.0 | sh
 RUN echo 'export PATH=$HOME/.rover/bin:$PATH' >> $HOME/.bashrc
-ENTRYPOINT [ "/root/.rover/bin/rover" ]
+
+COPY ./publishSubgraph.sh /home
 
 WORKDIR /home
-COPY ./publishSubgraph.sh /home
+
+ENTRYPOINT [ "/root/.rover/bin/rover" ]
