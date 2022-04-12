@@ -25,25 +25,18 @@ done
 
 echo "Publishing subgraph $graphName to namespace $namespace"
 
-overallExitCode=0
-
 echo "======================================================================================"
 echo "Publishing $schemaName schema from $url"
 
-/root/.rover/bin/rover subgraph introspect "$url" | \
-  grep -v -e '^There is a newer version of Rover' -e 'For instructions on how to install' | \
-/root/.rover/bin/rover subgraph publish atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
-  --name "$graphName" --schema - --routing-url "$url" --convert --output json > /tmp/"$schemaName"-out.json
-success=$(cat /tmp/"$schemaName"-out.json | jq '.data.success')
-error=$(cat /tmp/"$schemaName"-out.json | jq '.data.error')
-supergraphWasUpdated=$(cat /tmp/"$schemaName"-out.json | jq '.data.supergraph_was_updated')
-if [[ "$success" != "true" ]]; then
-    echo -e "Update of $schemaName failed with: \033[31m$error\033[0m"
-    overallExitCode=$((overallExitCode | 1))
-else
-    echo -e "Update of $schemaName \033[32msucceeded\033[0m, supergraph $([[ $supergraphWasUpdated = 'true' ]] && echo 'was' ||echo 'was NOT ') updated"
-fi
+/root/.rover/bin/rover subgraph introspect "$url" \
+  | grep -v -e '^There is a newer version of Rover' -e 'For instructions on how to install' \
+  | /root/.rover/bin/rover subgraph publish atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
+    --name "$graphName" \
+    --schema - \
+    --routing-url "$url"
+
+EXIT_CODE=$?
 
 echo "======================================================================================"
-echo "exit code: $overallExitCode"
-exit $overallExitCode
+echo "exit code: $EXIT_CODE"
+exit $EXIT_CODE
