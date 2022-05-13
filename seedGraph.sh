@@ -19,15 +19,15 @@ done
 [ -z "$schemaName" ] && die "-s schemaName is not set"
 [ -z "$namespace" ] && die "-n namespace is not set"
 
-echo "Initialising graph $schema for namespace $namespace"
+echo "Initialising graph $schemaName for namespace $namespace"
 
 echo "======================================================================================"
-echo "Publishing $schemaName schema from atp-ailo-gateway-${schema}-managed@dev"
+echo "Publishing $schemaName schema from atp-ailo-gateway-$schemaName-managed@dev"
 
-/root/.rover/bin/rover supergraph fetch atp-ailo-gateway-${schema}-managed@"$namespace" \
-    && echo "Graph: atp-ailo-gateway-${schema}-managed@$namespace already exists!" \
-    || /root/.rover/bin/rover supergraph fetch atp-ailo-gateway-${schema}-managed@dev \
-        | /root/.rover/bin/rover graph publish atp-ailo-gateway-${schema}-managed@"$namespace" --schema -
+/root/.rover/bin/rover supergraph fetch atp-ailo-gateway-$schemaName-managed@$namespace \
+    && echo "Graph: atp-ailo-gateway-$schemaName-managed@$namespace already exists!" \
+    || /root/.rover/bin/rover supergraph fetch atp-ailo-gateway-$schemaName-managed@dev \
+        | /root/.rover/bin/rover graph publish atp-ailo-gateway-$schemaName-managed@$namespace --schema -
 
 EXIT_CODE=$?
 
