@@ -24,10 +24,26 @@ echo "Initialising graph $schemaName for namespace $namespace"
 echo "======================================================================================"
 echo "Publishing $schemaName schema from atp-ailo-gateway-$schemaName-managed@dev"
 
+BASE_SCHEMA="schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Mutation @extends {
+  atpEmptyStarterSchemaNoop: Boolean
+}
+
+type Query @extends {
+  atpEmptyStarterSchemaNoop: Boolean
+}
+"
+
 /root/.rover/bin/rover supergraph fetch atp-ailo-gateway-$schemaName-managed@$namespace \
     && echo "Graph: atp-ailo-gateway-$schemaName-managed@$namespace already exists!" \
     || /root/.rover/bin/rover supergraph fetch atp-ailo-gateway-$schemaName-managed@dev \
-        | /root/.rover/bin/rover graph publish atp-ailo-gateway-$schemaName-managed@$namespace --schema -
+        | /root/.rover/bin/rover graph publish atp-ailo-gateway-$schemaName-managed@$namespace --schema - \
+        && echo $BASE_SCHEMA \
+            | /root/.rover/bin/rover subgraph publish atp-ailo-gateway-$schemaName-managed@$namespace --schema - --convert --name atp-empty-starter-schema --routing-url ""
 
 EXIT_CODE=$?
 
