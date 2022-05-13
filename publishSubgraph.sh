@@ -33,7 +33,8 @@ echo "Publishing $schemaName schema from $url"
   | /root/.rover/bin/rover subgraph publish atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
     --name "$graphName" \
     --schema - \
-    --routing-url "$url"
+    --routing-url "$url" \
+    --convert
 
 EXIT_CODE=$?
 
