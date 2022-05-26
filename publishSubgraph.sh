@@ -29,7 +29,11 @@ echo "==========================================================================
 echo "Publishing $schemaName schema from $url"
 
 /root/.rover/bin/rover subgraph introspect "$url" \
-  | grep -v -e '^There is a newer version of Rover' -e 'For instructions on how to install' \
+  | /root/.rover/bin/rover subgraph check atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
+    --name "$graphName" \
+    --schema -
+
+/root/.rover/bin/rover subgraph introspect "$url" \
   | /root/.rover/bin/rover subgraph publish atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
     --name "$graphName" \
     --schema - \
