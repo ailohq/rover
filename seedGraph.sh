@@ -38,7 +38,7 @@ type Query @extends {
 }
 "
 
-/root/.rover/bin/rover supergraph fetch atp-ailo-gateway-$schemaName-managed@$namespace \
+/root/.rover/bin/rover supergraph fetch atp-ailo-gateway-$schemaName-managed@$namespace &> /dev/null \
     && echo "Graph: atp-ailo-gateway-$schemaName-managed@$namespace already exists!" \
     || echo $BASE_SCHEMA | /root/.rover/bin/rover subgraph publish atp-ailo-gateway-$schemaName-managed@$namespace --schema - --convert --name atp-empty-starter-schema --routing-url ""
 

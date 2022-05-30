@@ -29,7 +29,7 @@ echo "==========================================================================
 echo "Publishing $schemaName schema from $url"
 
 /root/.rover/bin/rover subgraph fetch atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
-    --name "$graphName" \
+    --name "$graphName" &> /dev/null \
     && /root/.rover/bin/rover subgraph introspect "$url" \
       | /root/.rover/bin/rover subgraph check atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
         --name "$graphName" \
