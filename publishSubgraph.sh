@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eo pipefail
+set -ou pipefail
 
 function die() {
   echo $1
@@ -17,26 +17,19 @@ do
         *) usage;;
     esac
 done
+echo "Publishing subgraph ${graphName} for namespace ${namespace}"
 
-[ -z "$schemaName" ] && die "-s schemaName is not set"
-[ -z "$graphName" ] && die "-g graphName is not set"
-[ -z "$url" ] && die "-u url is not set"
-[ -z "$namespace" ] && die "-n namespace is not set"
+if /root/.rover/bin/rover subgraph fetch atp-ailo-gateway-"$schemaName"-managed@"$namespace" --name "$graphName" &> /dev/null; then
+    if ! /root/.rover/bin/rover subgraph introspect "$url" | /root/.rover/bin/rover subgraph check atp-ailo-gateway-"$schemaName"-managed@"$namespace" --name "$graphName" --schema -; then
+        echo "Schema checks failed"
+        EXIT_CODE=$?
+        echo "exit code: $EXIT_CODE"
+        exit $EXIT_CODE
+    fi
 
-echo "Publishing subgraph $graphName to namespace $namespace"
-
-echo "======================================================================================"
-echo "Publishing $schemaName schema from $url"
-
-/root/.rover/bin/rover subgraph fetch atp-ailo-gateway-"$schemaName"-managed@"$namespace" --name "$graphName" &> /dev/null \
-    && \
-        { \
-            /root/.rover/bin/rover subgraph introspect "$url" \
-              | /root/.rover/bin/rover subgraph check atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
-                --name "$graphName" \
-                --schema -
-        } \
-    || echo "$graphName doesn't exist yet"
+else
+    echo "${graphName} doesn't exist yet"
+fi
 
 /root/.rover/bin/rover subgraph introspect "$url" \
   | /root/.rover/bin/rover subgraph publish atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
@@ -47,6 +40,5 @@ echo "Publishing $schemaName schema from $url"
 
 EXIT_CODE=$?
 
-echo "======================================================================================"
 echo "exit code: $EXIT_CODE"
 exit $EXIT_CODE
