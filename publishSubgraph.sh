@@ -30,11 +30,11 @@ echo "Publishing $schemaName schema from $url"
 
 /root/.rover/bin/rover subgraph fetch atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
     --name "$graphName" &> /dev/null \
-    && /root/.rover/bin/rover subgraph introspect "$url" \
+    && ( /root/.rover/bin/rover subgraph introspect "$url" \
       | /root/.rover/bin/rover subgraph check atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
         --name "$graphName" \
         --schema - \
-    || echo "$graphName doesn't exist yet"
+        ) || echo "$graphName doesn't exist yet"
 
 /root/.rover/bin/rover subgraph introspect "$url" \
   | /root/.rover/bin/rover subgraph publish atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
