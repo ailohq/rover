@@ -17,11 +17,12 @@ do
         *) usage;;
     esac
 done
-echo "Publishing subgraph ${graphName} for namespace ${namespace}"
+
+echo "## ${schemaName^^} ##"
+echo ""
 
 if /root/.rover/bin/rover subgraph fetch atp-ailo-gateway-"$schemaName"-managed@"$namespace" --name "$graphName" &> /dev/null; then
     if ! /root/.rover/bin/rover subgraph introspect "$url" | /root/.rover/bin/rover subgraph check atp-ailo-gateway-"$schemaName"-managed@"$namespace" --name "$graphName" --schema -; then
-        echo "Schema checks failed"
         exit 1
     fi
 
@@ -39,4 +40,6 @@ fi
 EXIT_CODE=$?
 
 echo "exit code: $EXIT_CODE"
+echo ""
+echo ""
 exit $EXIT_CODE
