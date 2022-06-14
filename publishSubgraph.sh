@@ -7,13 +7,14 @@ function die() {
   exit 1
 }
 
-while getopts s:g:u:n: flag
+while getopts s:g:u:n:c: flag
 do
     case "${flag}" in
         s) schemaName=${OPTARG};;
         g) graphName=${OPTARG};;
         u) url=${OPTARG};;
         n) namespace=${OPTARG};;
+        c) check=${OPTARG};;
         *) usage;;
     esac
 done
@@ -21,13 +22,15 @@ done
 echo "## ${schemaName^^} ##"
 echo ""
 
-if /root/.rover/bin/rover subgraph fetch atp-ailo-gateway-"$schemaName"-managed@"$namespace" --name "$graphName" &> /dev/null; then
-    if ! /root/.rover/bin/rover subgraph introspect "$url" | /root/.rover/bin/rover subgraph check atp-ailo-gateway-"$schemaName"-managed@"$namespace" --name "$graphName" --schema -; then
-        exit 1
-    fi
+if [[ "${check}" == "true" ]]; then
+    if /root/.rover/bin/rover subgraph fetch atp-ailo-gateway-"$schemaName"-managed@"$namespace" --name "$graphName" &> /dev/null; then
+        if ! /root/.rover/bin/rover subgraph introspect "$url" | /root/.rover/bin/rover subgraph check atp-ailo-gateway-"$schemaName"-managed@"$namespace" --name "$graphName" --schema -; then
+            exit 1
+        fi
 
-else
-    echo "${graphName} doesn't exist yet"
+    else
+        echo "${graphName} doesn't exist yet"
+    fi
 fi
 
 /root/.rover/bin/rover subgraph introspect "$url" \
