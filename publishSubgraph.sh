@@ -16,21 +16,21 @@ done
 echo "## ${schemaName^^} ##"
 echo ""
 
-SCHEMA_SDL=$(rover subgraph introspect "$url")
+rover subgraph introspect "$url" > schema.graphql
 
 if [[ "${check}" == "true" ]]; then
     if rover subgraph fetch atp-ailo-gateway-"$schemaName"-managed@"$namespace" --name "$graphName" &> /dev/null; then
-        if ! APOLLO_KEY="${LEGACY_APOLLO_KEY}" rover subgraph check "ailo-gateway-${schemaName}-managed@prod" --name "$graphName" --schema "${SCHEMA_SDL}"; then
+        if ! APOLLO_KEY="${LEGACY_APOLLO_KEY}" rover subgraph check "ailo-gateway-${schemaName}-managed@prod" --name "$graphName" --schema "./schema.graphql"; then
             echo "[Schema Check] Would have failed NORMAL schema check against prod"
         fi
 
-        if ! APOLLO_KEY="${LEGACY_APOLLO_KEY}" rover subgraph check "ailo-gateway-${schemaName}-managed@prod" --name "$graphName" --schema "${SCHEMA_SDL}" --validation-period="2 days" --query-count-threshold="5"; then
+        if ! APOLLO_KEY="${LEGACY_APOLLO_KEY}" rover subgraph check "ailo-gateway-${schemaName}-managed@prod" --name "$graphName" --schema "./schema.graphql" --validation-period="2 days" --query-count-threshold="5"; then
             echo "[Schema Check] Would have failed LENIENT schema check against prod"
         fi
 
         rover subgraph publish atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
             --name "$graphName" \
-            --schema "${SCHEMA_SDL}" \
+            --schema "./schema.graphql" \
             --routing-url "$url" \
             --convert
     else
@@ -40,7 +40,7 @@ if [[ "${check}" == "true" ]]; then
         # Don't log all the unavoidable warnings that appear when publishing a graph for the first time
         rover subgraph publish atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
             --name "$graphName" \
-            --schema "${SCHEMA_SDL}" \
+            --schema "./schema.graphql" \
             --routing-url "$url" \
             --convert \
             --log "error"
