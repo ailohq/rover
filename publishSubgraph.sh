@@ -20,11 +20,11 @@ SCHEMA_SDL=$(rover subgraph introspect "$url")
 
 if [[ "${check}" == "true" ]]; then
     if rover subgraph fetch atp-ailo-gateway-"$schemaName"-managed@"$namespace" --name "$graphName" &> /dev/null; then
-        if ! APOLLO_KEY="LEGACY_APOLLO_KEY" rover subgraph check "ailo-gateway-${schemaName}-managed@prod" --name "$graphName" --schema "${SCHEMA_SDL}"; then
+        if ! APOLLO_KEY="${LEGACY_APOLLO_KEY}" rover subgraph check "ailo-gateway-${schemaName}-managed@prod" --name "$graphName" --schema "${SCHEMA_SDL}"; then
             echo "[Schema Check] Would have failed NORMAL schema check against prod"
         fi
 
-        if ! APOLLO_KEY="LEGACY_APOLLO_KEY" rover subgraph check "ailo-gateway-${schemaName}-managed@prod" --name "$graphName" --schema "${SCHEMA_SDL}" --validation-period="2 days" --query-count-threshold="5"; then
+        if ! APOLLO_KEY="${LEGACY_APOLLO_KEY}" rover subgraph check "ailo-gateway-${schemaName}-managed@prod" --name "$graphName" --schema "${SCHEMA_SDL}" --validation-period="2 days" --query-count-threshold="5"; then
             echo "[Schema Check] Would have failed LENIENT schema check against prod"
         fi
 
