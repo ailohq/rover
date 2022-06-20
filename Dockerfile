@@ -1,13 +1,14 @@
-FROM alpine
+FROM public.ecr.aws/docker/library/debian:bullseye-slim
 
-RUN apk --no-cache add curl bash
+WORKDIR /app
 
-RUN curl -sSL https://rover.apollo.dev/nix/v0.6.0 | sh
-RUN echo 'export PATH=$HOME/.rover/bin:$PATH' >> $HOME/.bashrc
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /home
+RUN curl -sSL https://rover.apollo.dev/nix/v0.7.0 | sh -s -- --force
 
-COPY ./publishSubgraph.sh /home
-COPY ./seedGraph.sh /home
+COPY ./publishSubgraph.sh /app
+COPY ./seedGraph.sh /app
 
-ENTRYPOINT [ "/root/.rover/bin/rover" ]
+ENTRYPOINT [ "rover" ]

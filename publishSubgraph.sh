@@ -1,11 +1,6 @@
 #!/bin/bash
 
-set -ou pipefail
-
-function die() {
-  echo $1
-  exit 1
-}
+set -eou pipefail
 
 while getopts s:g:u:n:c: flag
 do
@@ -15,33 +10,42 @@ do
         u) url=${OPTARG};;
         n) namespace=${OPTARG};;
         c) check=${OPTARG};;
-        *) usage;;
     esac
 done
 
 echo "## ${schemaName^^} ##"
 echo ""
 
+SCHEMA_SDL=$(rover subgraph introspect "$url")
+
 if [[ "${check}" == "true" ]]; then
-    if /root/.rover/bin/rover subgraph fetch atp-ailo-gateway-"$schemaName"-managed@"$namespace" --name "$graphName" &> /dev/null; then
-        if ! /root/.rover/bin/rover subgraph introspect "$url" | /root/.rover/bin/rover subgraph check "ailo-gateway-${schemaName}-managed@prod" --name "$graphName" --schema -; then
+    if rover subgraph fetch atp-ailo-gateway-"$schemaName"-managed@"$namespace" --name "$graphName" &> /dev/null; then
+        if ! APOLLO_KEY="${LEGACY_APOLLO_KEY}" rover subgraph check "ailo-gateway-${schemaName}-managed@prod" --name "$graphName" --schema "${SCHEMA_SDL}"; then
             echo "[Schema Check] Would have failed NORMAL schema check against prod"
         fi
 
-        if ! /root/.rover/bin/rover subgraph introspect "$url" | /root/.rover/bin/rover subgraph check "ailo-gateway-${schemaName}-managed@prod" --name "$graphName" --schema - --validation-period="2 days" --query-count-threshold="5"; then
+        if ! APOLLO_KEY="${LEGACY_APOLLO_KEY}" rover subgraph check "ailo-gateway-${schemaName}-managed@prod" --name "$graphName" --schema "${SCHEMA_SDL}" --validation-period="2 days" --query-count-threshold="5"; then
             echo "[Schema Check] Would have failed LENIENT schema check against prod"
         fi
+
+        rover subgraph publish atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
+            --name "$graphName" \
+            --schema "${SCHEMA_SDL}" \
+            --routing-url "$url" \
+            --convert
     else
+        # Probably a new namespace
         echo "${graphName} doesn't exist yet"
+        
+        # Don't log all the unavoidable warnings that appear when publishing a graph for the first time
+        rover subgraph publish atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
+            --name "$graphName" \
+            --schema "${SCHEMA_SDL}" \
+            --routing-url "$url" \
+            --convert \
+            --log "error"
     fi
 fi
-
-/root/.rover/bin/rover subgraph introspect "$url" \
-  | /root/.rover/bin/rover subgraph publish atp-ailo-gateway-"$schemaName"-managed@"$namespace" \
-    --name "$graphName" \
-    --schema - \
-    --routing-url "$url" \
-    --convert
 
 EXIT_CODE=$?
 
@@ -49,3 +53,4 @@ echo "exit code: $EXIT_CODE"
 echo ""
 echo ""
 exit $EXIT_CODE
+
