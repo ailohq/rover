@@ -11,4 +11,6 @@ RUN curl -sSL https://rover.apollo.dev/nix/v0.7.0 | sh -s -- --force
 COPY ./publishSubgraph.sh /app
 COPY ./seedGraph.sh /app
 
+ENV PATH="/root/.rover/bin:${PATH}"
+
 ENTRYPOINT [ "rover" ]
